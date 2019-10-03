@@ -85,6 +85,20 @@ help:
 		helpCommands[""] = 0; \
 		helpMessages[""] = 0; \
 	}\
+	function addToCommandsMessages(){\
+		if (helpMessage) { \
+			helpCommands[helpIndex] = helpCommand;\
+			helpMessages[helpIndex] = helpMessage;\
+			\
+			helpCommandLength = length(helpCommand); \
+			if (helpCommandLength > longuestHelpCommandLength) { \
+				longuestHelpCommandLength = helpCommandLength;\
+			} \
+			\
+			helpIndex++; \
+			helpMessage = ""; \
+		} \
+	} \
 	{ \
 		line = $$0; \
 		while((n = index(line, "http")) > 0) { \
@@ -99,19 +113,10 @@ help:
 		\
 		if ($$0 ~ /^.PHONY: [a-zA-Z\-\_0-9]+$$/) { \
 			helpCommand = substr($$0, index($$0, ":") + 2); \
-			\
-			if (helpMessage) { \
-				helpCommands[helpIndex] = helpCommand;\
-				helpMessages[helpIndex] = helpMessage;\
-				\
-				helpCommandLength = length(helpCommand); \
-				if (helpCommandLength > longuestHelpCommandLength) { \
-					longuestHelpCommandLength = helpCommandLength;\
-				} \
-				\
-				helpIndex++; \
-				helpMessage = ""; \
-			} \
+			addToCommandsMessages();\
+		} else if ($$0 ~ /^[a-zA-Z\-\_0-9.]+:/) { \
+			helpCommand = substr($$0, 0, index($$0, ":")); \
+			addToCommandsMessages();\
 		} else if ($$0 ~ /^##/) { \
 			if (helpMessage) { \
 				helpMessage = helpMessage "\n" substr($$0, 3); \
