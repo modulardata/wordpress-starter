@@ -132,9 +132,9 @@ help:
 				split(helpMessages[i], splitedHelpMessages, "\n"); \
 				for (y in splitedHelpMessages){ \
 					if (y == 1){ \
-						printf "    %s\n", splitedHelpMessages[y];\
+						printf "   %s\n", splitedHelpMessages[y];\
 					} else { \
-						printf "    %"longuestHelpCommandLength"s    %s\n", "", splitedHelpMessages[y];\
+						printf "   %"longuestHelpCommandLength"s    %s\n", "", splitedHelpMessages[y];\
 					} \
 				} \
 			} \
