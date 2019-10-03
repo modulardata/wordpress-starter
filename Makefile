@@ -78,7 +78,14 @@ help:
 	@printf "$(call title,USAGE)"
 	@printf "    make <SUBCOMMAND>\n\n"
 	@printf "$(call title,SUBCOMMANDS)"
-	@awk '{ \
+	@awk '\
+	BEGIN { \
+		longuestHelpCommandLength = 0; \
+		helpIndex =0; \
+		helpCommands[""] = 0; \
+		helpMessages[""] = 0; \
+	}\
+	{ \
 		line = $$0; \
 		while((n = index(line, "http")) > 0) { \
 			if (match(line, "https?://[^ ]+")) { \
@@ -88,20 +95,43 @@ help:
 			} else {\
 				break; \
 			} \
-		}\
+		} \
 		\
 		if ($$0 ~ /^.PHONY: [a-zA-Z\-\_0-9]+$$/) { \
 			helpCommand = substr($$0, index($$0, ":") + 2); \
+			\
 			if (helpMessage) { \
-				printf "    $(call primary,%-8s)%s\n", \
-					helpCommand, helpMessage; \
+				helpCommands[helpIndex] = helpCommand;\
+				helpMessages[helpIndex] = helpMessage;\
+				\
+				helpCommandLength = length(helpCommand); \
+				if (helpCommandLength > longuestHelpCommandLength) { \
+					longuestHelpCommandLength = helpCommandLength;\
+				} \
+				\
+				helpIndex++; \
 				helpMessage = ""; \
 			} \
 		} else if ($$0 ~ /^##/) { \
 			if (helpMessage) { \
-				helpMessage = helpMessage "\n            " substr($$0, 3); \
+				helpMessage = helpMessage "\n" substr($$0, 3); \
 			} else { \
 				helpMessage = substr($$0, 3); \
+			} \
+		} \
+	} \
+	END { \
+		for (i in helpCommands) {	\
+			if (i != ""){	\
+				printf "    \033[38;2;166;204;112;1m%-"longuestHelpCommandLength"s\033[0m", helpCommands[i]; \
+				split(helpMessages[i], splitedHelpMessages, "\n"); \
+				for (y in splitedHelpMessages){ \
+					if (y == 1){ \
+						printf "    %s\n", splitedHelpMessages[y];\
+					} else { \
+						printf "    %"longuestHelpCommandLength"s    %s\n", "", splitedHelpMessages[y];\
+					} \
+				} \
 			} \
 		} \
 	}' \
